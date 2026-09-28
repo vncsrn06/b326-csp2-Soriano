@@ -1,65 +1,78 @@
 package com.joysistvi.recordingapp.service;
 
-import com.joysistvi.recordingapp.dao.AlbumDao;
 import com.joysistvi.recordingapp.model.Album;
+import com.joysistvi.recordingapp.repository.AlbumRepository;
 
+import java.time.Year;
 import java.util.List;
 
 public class AlbumServiceImpl implements AlbumService {
 
-    private final AlbumDao albumDao;
+    private final AlbumRepository albumRepository; // Composition
 
-    public AlbumServiceImpl(AlbumDao albumDao) {
-        this.albumDao = albumDao;
+    // Constructor injection
+    public AlbumServiceImpl(AlbumRepository albumRepository) {
+        this.albumRepository = albumRepository;
     }
 
     @Override
     public List<Album> getAllAlbums() {
-        return albumDao.getAllAlbums();
-    }
-
-    @Override
-    public List<Album> getAlbumsByArtistId(int artistId) {
-        return albumDao.getAlbumsByArtistId(artistId);
-    }
-
-    @Override
-    public Album getAlbumById(int id) {
-        return albumDao.getAlbumById(id);
+        return albumRepository.getAllAlbumsWithArtist();
     }
 
     @Override
     public List<Album> searchAlbum(String keyword) {
-        return albumDao.searchAlbum(keyword);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            System.out.println("Search keyword cannot be empty.");
+            return List.of();
+        }
+        return albumRepository.searchAlbum(keyword.trim());
     }
 
     @Override
-    public List<Album> getAllArchivedAlbums() {
-        return albumDao.getAllArchivedAlbums();
-    }
-
-    @Override
-    public boolean createAlbum(Album album) {
-        return albumDao.createAlbum(album);
+    public boolean addAlbum(Album album) {
+        if (!isValid(album)) {
+            return false;
+        }
+        return albumRepository.createAlbum(album);
     }
 
     @Override
     public boolean updateAlbum(Album album) {
-        return albumDao.updateAlbum(album);
-    }
-
-    @Override
-    public boolean archiveAlbum(int id) {
-        return albumDao.archiveAlbum(id);
-    }
-
-    @Override
-    public boolean restoreAlbum(int id) {
-        return albumDao.restoreAlbum(id);
+        if (album.getId() <= 0) {
+            System.out.println("Invalid album ID.");
+            return false;
+        }
+        if (!isValid(album)) {
+            return false;
+        }
+        return albumRepository.updateAlbum(album);
     }
 
     @Override
     public boolean deleteAlbum(int id) {
-        return albumDao.deleteAlbum(id);
+        if (id <= 0) {
+            System.out.println("Invalid album ID.");
+            return false;
+        }
+        return albumRepository.deleteAlbum(id);
+    }
+
+    // Simple validation rules before hitting the database
+    private boolean isValid(Album album) {
+        if (album.getName() == null || album.getName().trim().isEmpty()) {
+            System.out.println("Album name is required.");
+            return false;
+        }
+        int currentYear = Year.now().getValue();
+        if (album.getYear() < 1900 || album.getYear() > currentYear + 1) {
+            System.out.println("Please enter a valid year (1900-" + (currentYear + 1) + ").");
+            return false;
+        }
+        if (album.getArtistId() <= 0) {
+            System.out.println("A valid artist ID is required.");
+            return false;
+        }
+        return true;
     }
 }

@@ -1,37 +1,49 @@
-
 package com.joysistvi.recordingapp.model;
 
-public class Song {
 
+// Model / Encapsulated Class
+
+// holds and presents data
+// This is where data passes through before going to the database or before being set to the User
+public class Song {
     private int id;
     private String title;
     private String length;
     private String genre;
+    private String albumName;
     private int albumId;
 
-    public Song(
-            String title,
-            String length,
-            String genre,
-            int albumId) {
+    public Song() {
+    }
 
+    public Song(int id, String title, String length, String genre, String albumName) {
+        this.id = id;
+        this.title = title;
+        this.length = length;
+        this.genre = genre;
+        this.albumName = albumName;
+    }
+
+    public Song(String title, String length, String genre, int albumId) {
         this.title = title;
         this.length = length;
         this.genre = genre;
         this.albumId = albumId;
     }
 
-    public Song(
-            int id,
-            String title,
-            String length,
-            String genre,
-            int albumId) {
-
+    public Song(int id, String title, String length, String genre, int albumId) {
         this.id = id;
         this.title = title;
         this.length = length;
         this.genre = genre;
+        this.albumId = albumId;
+    }
+
+    public int getAlbumId() {
+        return albumId;
+    }
+
+    public void setAlbumId(int albumId) {
         this.albumId = albumId;
     }
 
@@ -67,12 +79,12 @@ public class Song {
         this.genre = genre;
     }
 
-    public int getAlbumId() {
-        return albumId;
+    public String getAlbumName() {
+        return albumName;
     }
 
-    public void setAlbumId(int albumId) {
-        this.albumId = albumId;
+    public void setAlbumName(String albumName) {
+        this.albumName = albumName;
     }
 
     @Override
@@ -82,7 +94,7 @@ public class Song {
                 ", title='" + title + '\'' +
                 ", length='" + length + '\'' +
                 ", genre='" + genre + '\'' +
-                ", albumId=" + albumId +
+                ", albumName='" + albumName + '\'' +
                 '}';
     }
 }

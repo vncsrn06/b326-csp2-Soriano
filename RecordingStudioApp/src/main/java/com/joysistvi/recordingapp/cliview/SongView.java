@@ -8,501 +8,227 @@ import java.util.Scanner;
 
 public class SongView {
 
-    private final SongController songController;
+    private final SongController songController; // Composition
     private final Scanner scanner;
+    private final boolean isAdmin;
 
-    public SongView(
-            SongController songController,
-            Scanner scanner) {
-
+    // Constructor injection
+    public SongView(SongController songController, Scanner scanner, boolean isAdmin) {
         this.songController = songController;
         this.scanner = scanner;
-    }
-
-    public void viewAlbumSongs(
-            int albumId,
-            String albumName) {
-
-        System.out.println(
-                "\n----- " +
-                        albumName +
-                        " -----"
-        );
-
-        List<Song> songs =
-                songController.handleViewSongsByAlbum(
-                        albumId
-                );
-
-        printSongs(songs);
+        this.isAdmin = isAdmin;
     }
 
     public void run() {
-
         int choice;
-
         do {
-
+            clearScreen();
             printMenu();
-
             choice = promptChoice();
 
             switch (choice) {
-
                 case 1 -> viewAllSongs();
-
                 case 2 -> searchSong();
-
-                case 3 -> addSong();
-
-                case 4 -> updateSong();
-
-                case 5 -> deleteSong();
-
-                case 0 ->
-                        System.out.println(
-                                "Returning to main menu..."
-                        );
-
-                default ->
-                        System.out.println(
-                                "Invalid choice. Try again."
-                        );
+                case 3 -> { if (isAdmin) addSong(); else denyAccess(); }
+                case 4 -> { if (isAdmin) updateSong(); else denyAccess(); }
+                case 5 -> { if (isAdmin) deleteSong(); else denyAccess(); }
+                case 6 -> { if (isAdmin) archiveSong(); else denyAccess(); }
+                case 7 -> { if (isAdmin) restoreSong(); else denyAccess(); }
+                case 8 -> { if (isAdmin) viewArchivedSongs(); else denyAccess(); }
+                case 0 -> System.out.println("Returning to dashboard...");
+                default -> System.out.println("Invalid choice. Try again.");
             }
 
             if (choice != 0) {
-
-                System.out.println(
-                        "\nPress Enter to continue..."
-                );
-
+                System.out.print("\nPress Enter to continue...");
                 scanner.nextLine();
             }
-
         } while (choice != 0);
     }
 
     private void printMenu() {
-
-        System.out.println(
-                "\n----- Song Management -----"
-        );
-
-        System.out.println(
-                "1. View All Songs"
-        );
-
-        System.out.println(
-                "2. Search Song"
-        );
-
-        System.out.println(
-                "3. Add Song"
-        );
-
-        System.out.println(
-                "4. Update Song"
-        );
-
-        System.out.println(
-                "5. Delete Song"
-        );
-
-        System.out.println(
-                "0. Back"
-        );
+        clearScreen();
+        System.out.println("\n---- " + (isAdmin ? "SONG MANAGEMENT" : "SONG CATALOG") + " ----");
+        System.out.println("1. View All Songs");
+        System.out.println("2. Search Song");
+        if (isAdmin) {
+            System.out.println("3. Add Song");
+            System.out.println("4. Update Song");
+            System.out.println("5. Delete Song");
+            System.out.println("6. Archive Song");
+            System.out.println("7. Restore Song");
+            System.out.println("8. View Archived Songs");
+        }
+        System.out.println("0. Back");
     }
 
     private int promptChoice() {
-
         System.out.print("Choice: ");
-
         return readInt();
     }
 
-    private int readInt() {
-
-        while (true) {
-
-            String input =
-                    scanner.nextLine();
-
-            try {
-
-                return Integer.parseInt(
-                        input.trim()
-                );
-
-            } catch (RuntimeException e) {
-
-                System.out.print(
-                        "Please enter a valid number: "
-                );
-            }
-        }
+    private void viewAllSongs() {
+        System.out.println("\n----- View All Songs -----");
+        List<Song> songs = songController.handleViewAllSongs();
+        printSongs(songs);
     }
 
-    private void viewAllSongs() {
-
-        System.out.println(
-                "\n----- All Songs -----"
-        );
-
-        List<Song> songs =
-                songController.handleViewAllSongs();
-
+    private void viewArchivedSongs() {
+        System.out.println("\n----- View All Archived Songs -----");
+        List<Song> songs = songController.handleViewArchivedSongs();
         printSongs(songs);
     }
 
     private void searchSong() {
-
-        System.out.println(
-                "\n----- Search Song -----"
-        );
-
-        System.out.print(
-                "Enter song title: "
-        );
-
-        String keyword =
-                scanner.nextLine();
-
-        List<Song> songs =
-                songController.searchSong(
-                        keyword
-                );
-
-        printSongs(songs);
+        System.out.println("\n----- Search Song -----");
+        System.out.print("Enter title keyword: ");
+        String keyword = scanner.nextLine();
+        printSongs(songController.handleSearchSong(keyword));
     }
 
     private void addSong() {
+        System.out.println("\n----- Add Song -----");
+        System.out.print("Title: ");
+        String title = scanner.nextLine();
 
-        System.out.println(
-                "\n----- Add Song -----"
-        );
+        System.out.print("Length (e.g. 3:45): ");
+        String length = scanner.nextLine();
 
-        System.out.print(
-                "Title: "
-        );
+        System.out.print("Genre: ");
+        String genre = scanner.nextLine();
 
-        String title =
-                scanner.nextLine();
+        System.out.print("Album ID: ");
+        int albumId = readInt();
 
-        if (title.trim().isEmpty()) {
+        Song song = new Song(title, length, genre, albumId);
 
-            System.out.println(
-                    "Song title cannot be empty."
-            );
-
-            return;
-        }
-
-        System.out.print(
-                "Length (e.g. 3:24): "
-        );
-
-        String length =
-                scanner.nextLine();
-
-        if (length.trim().isEmpty()) {
-
-            System.out.println(
-                    "Length cannot be empty."
-            );
-
-            return;
-        }
-
-        System.out.print(
-                "Genre: "
-        );
-
-        String genre =
-                scanner.nextLine();
-
-        if (genre.trim().isEmpty()) {
-
-            System.out.println(
-                    "Genre cannot be empty."
-            );
-
-            return;
-        }
-
-        System.out.print(
-                "Album ID: "
-        );
-
-        int albumId =
-                readInt();
-
-        Song song =
-                new Song(
-                        title,
-                        length,
-                        genre,
-                        albumId
-                );
-
-        boolean success =
-                songController.handleCreateSong(
-                        song
-                );
-
-        System.out.println(
-                success
-                        ? "Song added successfully."
-                        : "Failed to add song."
-        );
+        boolean success = songController.handleAddSong(song);
+        System.out.println(success ? "Song added successfully." : "Failed to add song.");
     }
 
     private void updateSong() {
+        System.out.println("\n----- Update Song -----");
+        System.out.print("Song ID to update: ");
+        int id = readInt();
 
-        System.out.println(
-                "\n----- Update Song -----"
-        );
+        Song existingSong = songController.handleGetSongById(id);
 
-        viewAllSongs();
-
-        System.out.print(
-                "Song ID to update: "
-        );
-
-        int id =
-                readInt();
-
-        Song current =
-                songController.handleGetSongById(
-                        id
-                );
-
-        if (current == null) {
-
-            System.out.println(
-                    "No song found with ID "
-                            + id
-                            + "."
-            );
-
+        if (existingSong == null) {
+            System.out.println("Song not found.");
             return;
         }
 
-        System.out.print(
-                "New title [" +
-                        current.getTitle() +
-                        "] (press Enter to keep current): "
-        );
+        System.out.println("\nPress Enter to keep the current value.");
 
-        String title =
-                scanner.nextLine();
-
-        if (title.trim().isEmpty()) {
-
-            title =
-                    current.getTitle();
+        System.out.print("Title [" + existingSong.getTitle() + "]: ");
+        String title = scanner.nextLine();
+        if (title.isBlank()) {
+            title = existingSong.getTitle();
         }
 
-        System.out.print(
-                "New length [" +
-                        current.getLength() +
-                        "] (press Enter to keep current): "
-        );
-
-        String length =
-                scanner.nextLine();
-
-        if (length.trim().isEmpty()) {
-
-            length =
-                    current.getLength();
+        System.out.print("Length [" + existingSong.getLength() + "]: ");
+        String length = scanner.nextLine();
+        if (length.isBlank()) {
+            length = existingSong.getLength();
         }
 
-        System.out.print(
-                "New genre [" +
-                        current.getGenre() +
-                        "] (press Enter to keep current): "
-        );
-
-        String genre =
-                scanner.nextLine();
-
-        if (genre.trim().isEmpty()) {
-
-            genre =
-                    current.getGenre();
+        System.out.print("Genre [" + existingSong.getGenre() + "]: ");
+        String genre = scanner.nextLine();
+        if (genre.isBlank()) {
+            genre = existingSong.getGenre();
         }
 
-        System.out.print(
-                "New Album ID [" +
-                        current.getAlbumId() +
-                        "] (press Enter to keep current): "
-        );
+        System.out.print("Album ID [" + existingSong.getAlbumId() + "]: ");
+        String albumInput = scanner.nextLine();
 
-        String albumInput =
-                scanner.nextLine();
+        int albumId = existingSong.getAlbumId();
 
-        int albumId;
-
-        if (albumInput.trim().isEmpty()) {
-
-            albumId =
-                    current.getAlbumId();
-
-        } else {
-
+        if (!albumInput.isBlank()) {
             try {
-
-                albumId =
-                        Integer.parseInt(
-                                albumInput.trim()
-                        );
-
+                albumId = Integer.parseInt(albumInput);
             } catch (NumberFormatException e) {
-
-                System.out.println(
-                        "Invalid Album ID."
-                );
-
-                return;
+                System.out.println("Invalid Album ID. Keeping the current value.");
             }
         }
 
-        Song song =
-                new Song(
-                        id,
-                        title,
-                        length,
-                        genre,
-                        albumId
-                );
+        Song updatedSong = new Song(id, title, length, genre, albumId);
 
-        boolean success =
-                songController.handleUpdateSong(
-                        song
-                );
+        boolean success = songController.handleUpdateSong(updatedSong);
 
-        System.out.println(
-                success
-                        ? "Song updated successfully."
-                        : "Failed to update song."
-        );
+        System.out.println(success
+                ? "Song updated successfully."
+                : "Failed to update song.");
     }
 
     private void deleteSong() {
+        System.out.println("\n----- Delete Song -----");
+        System.out.print("Song ID to delete: ");
+        int id = readInt();
 
-        System.out.println(
-                "\n----- Delete Song -----"
-        );
+        boolean success = songController.handleDeleteSong(id);
+        System.out.println(success ? "Song deleted successfully." : "Failed to delete song.");
+    }
 
-        viewAllSongs();
+    private void archiveSong() {
+        System.out.println("\n----- Archive Song -----");
+        System.out.print("Song ID to archive: ");
+        int id = readInt();
 
-        System.out.print(
-                "Song ID to delete: "
-        );
+        boolean success = songController.handleArchiveSong(id);
+        System.out.println(success ? "Song archived successfully." : "Failed to archive song.");
+    }
 
-        int id =
-                readInt();
+    private void restoreSong() {
+        System.out.println("\n----- Restore Song -----");
+        System.out.print("Song ID to restore: ");
+        int id = readInt();
 
-        Song current =
-                songController.handleGetSongById(
-                        id
-                );
-
-        if (current == null) {
-
-            System.out.println(
-                    "No song found with ID "
-                            + id
-                            + "."
-            );
-
-            return;
-        }
-
-        System.out.println(
-                "Song: " +
-                        current.getTitle()
-        );
-
-        System.out.print(
-                "Are you sure you want to delete this song? (Y/N): "
-        );
-
-        String confirm =
-                scanner.nextLine();
-
-        if (confirm.equalsIgnoreCase("Y")) {
-
-            boolean success =
-                    songController.handleDeleteSong(
-                            id
-                    );
-
-            System.out.println(
-                    success
-                            ? "Song deleted successfully."
-                            : "Failed to delete song."
-            );
-
-        } else {
-
-            System.out.println(
-                    "Delete cancelled."
-            );
-        }
+        boolean success = songController.handleRestoreSong(id);
+        System.out.println(success ? "Song restored successfully." : "Failed to restore song.");
     }
 
     private void printSongs(List<Song> songs) {
 
-        if (songs == null ||
-                songs.isEmpty()) {
-
-            System.out.println(
-                    "No songs found for this album."
-            );
-
+        if (songs.isEmpty()) {
+            System.out.println("No songs found.");
             return;
         }
 
-        String border =
-                "+" +
-                        "-".repeat(6) +
-                        "+" +
-                        "-".repeat(27) +
-                        "+" +
-                        "-".repeat(10) +
-                        "+" +
-                        "-".repeat(17) +
-                        "+" +
-                        "-".repeat(10) +
-                        "+";
+        String border = "+" + "-".repeat(6) + "+" + "-".repeat(27) + "+"
+                + "-".repeat(10) + "+" + "-".repeat(14) + "+" + "-".repeat(17) + "+";
 
         System.out.println(border);
-
-        System.out.printf(
-                "| %-4s | %-25s | %-8s | %-15s | %-8s |%n",
-                "ID",
-                "Title",
-                "Length",
-                "Genre",
-                "Album ID"
-        );
-
+        System.out.printf("| %-4s | %-25s | %-8s | %-12s | %-15s |%n",
+                "ID", "Title", "Length", "Genre", "Album");
         System.out.println(border);
 
         for (Song song : songs) {
-
-            System.out.printf(
-                    "| %-4d | %-25s | %-8s | %-15s | %-8d |%n",
-                    song.getId(),
-                    song.getTitle(),
-                    song.getLength(),
-                    song.getGenre(),
-                    song.getAlbumId()
-            );
+            System.out.printf("| %-4d | %-25s | %-8s | %-12s | %-15s |%n",
+                    song.getId(), song.getTitle(), song.getLength(), song.getGenre(), song.getAlbumName());
         }
 
         System.out.println(border);
     }
-}
 
+    private void denyAccess() {
+        System.out.println("Access denied. Admins only.");
+    }
+
+    // Clears the console using ANSI escape codes. Works in real terminals and in
+    // IntelliJ's Run console IF "Emulate terminal in output console" is enabled.
+    private void clearScreen() {
+        System.out.print("\033[H\033[2J");
+        System.out.flush();
+    }
+
+    // Reads an int safely, re-prompting on invalid input, then consumes the trailing newline
+    private int readInt() {
+        while (!scanner.hasNextInt()) {
+            System.out.print("Please enter a valid number: ");
+            scanner.next();
+        }
+        int value = scanner.nextInt();
+        scanner.nextLine(); // consume leftover newline
+        return value;
+    }
+}

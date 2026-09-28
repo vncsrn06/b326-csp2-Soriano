@@ -8,15 +8,19 @@ public interface SongService {
 
     List<Song> getAllSongs();
 
-    List<Song> getSongsByAlbumId(int albumId);
-
     Song getSongById(int id);
 
     List<Song> searchSong(String keyword);
 
-    boolean createSong(Song song);
+    List<Song> getArchivedSongs();
+
+    boolean addSong(Song song);
 
     boolean updateSong(Song song);
 
     boolean deleteSong(int id);
+
+    boolean archiveSong(int id);
+
+    boolean restoreSong(int id);
 }

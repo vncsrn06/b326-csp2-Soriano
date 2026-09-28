@@ -1,38 +1,22 @@
 package com.joysistvi.recordingapp.service;
 
 import com.joysistvi.recordingapp.model.Artist;
-import com.joysistvi.recordingapp.repository.ArtistRepo;
+import com.joysistvi.recordingapp.repository.ArtistRepository;
 
 import java.util.List;
 
 public class ArtistServiceImpl implements ArtistService {
 
-    private final ArtistRepo artistRepo;
+    private final ArtistRepository artistRepository; // Composition
 
     // Constructor injection
-    public ArtistServiceImpl(ArtistRepo artistRepo) {
-        this.artistRepo = artistRepo;
+    public ArtistServiceImpl(ArtistRepository artistRepository) {
+        this.artistRepository = artistRepository;
     }
 
     @Override
     public List<Artist> getAllArtists() {
-        return artistRepo.getAllArtists();
-    }
-
-    @Override
-    public Artist getArtistById(int id) {
-        if (id <= 0) {
-            System.out.println("Invalid artist ID.");
-            return null;
-        }
-
-        Artist artist = artistRepo.getArtistById(id);
-
-        if (artist == null) {
-            System.out.println("Artist not found.");
-        }
-
-        return artist;
+        return artistRepository.getAllArtists();
     }
 
     @Override
@@ -41,58 +25,40 @@ public class ArtistServiceImpl implements ArtistService {
             System.out.println("Search keyword cannot be empty.");
             return List.of();
         }
-
-        return artistRepo.searchArtist(keyword.trim());
+        return artistRepository.searchArtist(keyword.trim());
     }
 
     @Override
-    public boolean createArtist(Artist artist) {
+    public Artist getArtistById(int id) {
+        if (id <= 0) {
+
+            return null;
+        }
+        Artist artist = artistRepository.getArtistById(id);
         if (artist == null) {
-            System.out.println("Artist cannot be null.");
+            System.out.println("Artist not found.");
+        }
+        return artist;
+    }
+
+    @Override
+    public boolean addArtist(Artist artist) {
+        if (!isValid(artist)) {
             return false;
         }
-
-        if (artist.getName() == null || artist.getName().trim().isEmpty()) {
-            System.out.println("Artist name is required.");
-            return false;
-        }
-
-        return artistRepo.createArtist(artist);
+        return artistRepository.createArtist(artist);
     }
 
     @Override
     public boolean updateArtist(Artist artist) {
-        if (artist == null) {
-            System.out.println("Artist cannot be null.");
-            return false;
-        }
-
-        if (artist.getName() == null || artist.getName().trim().isEmpty()) {
-            System.out.println("Artist name is required.");
-            return false;
-        }
-
-        return artistRepo.updateArtist(artist);
-    }
-
-    @Override
-    public boolean archiveArtist(int id) {
-        if (id <= 0) {
+        if (artist.getId() <= 0) {
             System.out.println("Invalid artist ID.");
             return false;
         }
-
-        return artistRepo.archiveArtist(id);
-    }
-
-    @Override
-    public boolean restoreArtist(int id) {
-        if (id <= 0) {
-            System.out.println("Invalid artist ID.");
+        if (!isValid(artist)) {
             return false;
         }
-
-        return artistRepo.restoreArtist(id);
+        return artistRepository.updateArtist(artist);
     }
 
     @Override
@@ -101,12 +67,38 @@ public class ArtistServiceImpl implements ArtistService {
             System.out.println("Invalid artist ID.");
             return false;
         }
-
-        return artistRepo.deleteArtist(id);
+        return artistRepository.deleteArtist(id);
     }
 
     @Override
-    public List<Artist> getAllArchivedArtists() {
-        return artistRepo.getAllArchivedArtists();
+    public boolean archiveArtist(int id) {
+        if (id <= 0) {
+            System.out.println("Invalid artist ID.");
+            return false;
+        }
+        return artistRepository.archiveArtist(id);
+    }
+
+    @Override
+    public boolean restoreArtist(int id) {
+        if (id <= 0) {
+            System.out.println("Invalid artist ID.");
+            return false;
+        }
+        return artistRepository.restoreArtist(id);
+    }
+
+    @Override
+    public List<Artist> getArchivedArtists() {
+        return artistRepository.readArchivedArtist();
+    }
+
+    // Simple validation rules before hitting the database
+    private boolean isValid(Artist artist) {
+        if (artist.getName() == null || artist.getName().trim().isEmpty()) {
+            System.out.println("Artist name is required.");
+            return false;
+        }
+        return true;
     }
 }
