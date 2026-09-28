@@ -8,13 +8,13 @@ public interface AlbumService {
 
     List<Album> getAllAlbums();
 
+    List<Album> getAlbumsByArtistId(int artistId);
+
     Album getAlbumById(int id);
 
     List<Album> searchAlbum(String keyword);
 
     List<Album> getAllArchivedAlbums();
-
-    List<Album> getAlbumsByArtistId(int artistId);
 
     boolean createAlbum(Album album);
 
@@ -26,4 +26,3 @@ public interface AlbumService {
 
     boolean deleteAlbum(int id);
 }
-

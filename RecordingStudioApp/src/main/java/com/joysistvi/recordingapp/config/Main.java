@@ -1,33 +1,37 @@
-package com.joysistvi.recordingapp.config;
+package com.joysistvi.recordingapp;
 
-import com.joysistvi.recordingapp.dao.ArtistDao;
+import com.joysistvi.recordingapp.cliview.UserView;
+import com.joysistvi.recordingapp.cliview.UserView;
+import com.joysistvi.recordingapp.config.DbConnection;
+import com.joysistvi.recordingapp.controller.UserController;
+import com.joysistvi.recordingapp.dao.UserDao;
+import com.joysistvi.recordingapp.service.UserService;
+import com.joysistvi.recordingapp.service.UserServiceImpl;
+
+import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args) {
 
-        // Create database connection
-        DbConnection db = new DbConnection();
+        // Database connection
+        DbConnection dbConnection = new DbConnection();
 
-        // Create Artist DAO
-        ArtistDao artistDao = new ArtistDao(db);
+        // DAO
+        UserDao userDao = new UserDao(dbConnection);
 
-        // CREATE
-        // artistDao.createArtist("Justin");
+        // Service
+        UserService userService = new UserServiceImpl(userDao);
 
-        // READ
-        artistDao.readAllArtists();
+        // Controller
+        UserController userController = new UserController(userService);
 
-        // UPDATE
-        // artistDao.updateArtist("Vince", 1);
+        Scanner scanner = new Scanner(System.in);
 
-        // ARCHIVE
-        // artistDao.archiveArtist(1);
+        UserView userView = new UserView(userController, scanner);
 
-        // RESTORE
-        // artistDao.restoreArtist(1);
+        userView.showLoginMenu();
 
-        // DELETE
-        // artistDao.deleteArtist(1);
+        scanner.close();
     }
 }

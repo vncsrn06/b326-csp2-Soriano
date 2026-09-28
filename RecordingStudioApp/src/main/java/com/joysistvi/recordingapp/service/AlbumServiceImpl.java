@@ -1,65 +1,65 @@
 package com.joysistvi.recordingapp.service;
 
+import com.joysistvi.recordingapp.dao.AlbumDao;
 import com.joysistvi.recordingapp.model.Album;
-import com.joysistvi.recordingapp.repository.AlbumRepo;
 
 import java.util.List;
 
 public class AlbumServiceImpl implements AlbumService {
 
-    private final AlbumRepo albumRepo;
+    private final AlbumDao albumDao;
 
-    public AlbumServiceImpl(AlbumRepo albumRepo) {
-        this.albumRepo = albumRepo;
+    public AlbumServiceImpl(AlbumDao albumDao) {
+        this.albumDao = albumDao;
     }
 
     @Override
     public List<Album> getAllAlbums() {
-        return albumRepo.getAllAlbums();
-    }
-
-    @Override
-    public Album getAlbumById(int id) {
-        return albumRepo.getAlbumById(id);
-    }
-
-    @Override
-    public List<Album> searchAlbum(String keyword) {
-        return albumRepo.searchAlbum(keyword);
-    }
-
-    @Override
-    public List<Album> getAllArchivedAlbums() {
-        return albumRepo.getAllArchivedAlbums();
+        return albumDao.getAllAlbums();
     }
 
     @Override
     public List<Album> getAlbumsByArtistId(int artistId) {
-        return albumRepo.getAlbumsByArtistId(artistId);
+        return albumDao.getAlbumsByArtistId(artistId);
+    }
+
+    @Override
+    public Album getAlbumById(int id) {
+        return albumDao.getAlbumById(id);
+    }
+
+    @Override
+    public List<Album> searchAlbum(String keyword) {
+        return albumDao.searchAlbum(keyword);
+    }
+
+    @Override
+    public List<Album> getAllArchivedAlbums() {
+        return albumDao.getAllArchivedAlbums();
     }
 
     @Override
     public boolean createAlbum(Album album) {
-        return albumRepo.createAlbum(album);
+        return albumDao.createAlbum(album);
     }
 
     @Override
     public boolean updateAlbum(Album album) {
-        return albumRepo.updateAlbum(album);
+        return albumDao.updateAlbum(album);
     }
 
     @Override
     public boolean archiveAlbum(int id) {
-        return albumRepo.archiveAlbum(id);
+        return albumDao.archiveAlbum(id);
     }
 
     @Override
     public boolean restoreAlbum(int id) {
-        return albumRepo.restoreAlbum(id);
+        return albumDao.restoreAlbum(id);
     }
 
     @Override
     public boolean deleteAlbum(int id) {
-        return albumRepo.deleteAlbum(id);
+        return albumDao.deleteAlbum(id);
     }
 }
